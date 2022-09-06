@@ -1,51 +1,35 @@
 package bus;
 
+import routes.Routes;
+
 import java.util.*;
 public class Bus{
     private String NumberPlate;
     private String startTime;
     private String endTime;
-    private int[][] seating = new int[10][4];
-    private String busType;//will implemet this later
-    private List<String> routes;
 
-    private List<String> bookings;
+    private Routes route;
+
 
     public Bus(){}
 
-    public Bus(String NumberPlate,String startTime,String endTime){
+    public Bus(String NumberPlate,String startTime,String endTime,Routes route){
         this.NumberPlate = NumberPlate;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.route = route;
+    }
+
+    public Routes getRoute() {
+        return route;
+    }
+
+    public void setRoute(Routes route) {
+        this.route = route;
     }
 
     public String getNumberPlate(){
         return NumberPlate;
-    }
-
-    public List<String> getRoutes(){
-        return routes;
-    }
-
-
-/*	public int getStartPoint(){
-		return StartPoint;
-	}
-
-	public int getDestinationPoint(){
-		return DestinationPoint;
-	}*/
-
-    public List<String> getBookings() {
-        return bookings;
-    }
-
-    public void setBookings(List<String> bookings) {
-        this.bookings = bookings;
-    }
-
-    public void setRoutes(List<String> routes){
-        this.routes =  routes;
     }
 
     public String getStartTime(){
@@ -60,22 +44,7 @@ public class Bus{
         this.NumberPlate = NumberPlate;
     }
 
-    /*public void setStartPoint(int StartPoint){
-        this.StartPoint =  StartPoint;
-    }
 
-    public void setDestinationpoint(int DestinationPoint){
-        this.DestinationPoint = DestinationPoint;
-    }
-    */
-
-    public int[][] getSeating() {
-        return seating;
-    }
-
-    public void setSeating(int[][] seating) {
-        this.seating = seating;
-    }
 
     public void startTime(String startTime){
         this.startTime =  startTime;

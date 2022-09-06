@@ -2,6 +2,9 @@ import java.util.*;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import customerBookingDetails.*;
 import bus.*;
@@ -10,21 +13,14 @@ import customer.*;
 import booking.*;
 import test.testDB;
 
-/*
-TO-DO
--> Date Validation of customer
--> Input validations for the user inputs - done
-*/
 
-class BusApplication{
-    private final BusApplicationHelper busApplicationHelper = new BusApplicationHelper();
-    public static void main(String args[])
+class BusApplication extends  Thread {
+
+     public static void main(String args[])
     {
         try{
-            Calendar calendar = Calendar.getInstance();
             CustomerDetails cd =  new CustomerDetails();
-            Booking booking = new Booking(calendar);
-            startApplication(cd,booking);
+            startApplication(cd);
         }
         catch(Exception exc){
             exc.printStackTrace();
@@ -33,7 +29,7 @@ class BusApplication{
 
     }
 
-    private static void startApplication(CustomerDetails cd, Booking booking){
+    private static void startApplication(CustomerDetails cd){
 
 //customer validation
         Scanner sc = new Scanner(System.in);
@@ -67,7 +63,7 @@ class BusApplication{
                 choice = sc.nextInt();
                 switch (choice) {
                     case 1:
-                        customerSignIn(booking);
+                        customerSignIn();
                         break;
                     case 2:
                         createCustomer(cd);
@@ -88,21 +84,25 @@ class BusApplication{
 
 
     // method to check if the customer is a valid person
-    public static void customerSignIn(Booking booking){
+    public static void customerSignIn(){
         testDB td = new testDB();
         Customer customer ;
+        char[] ch_pwd;
+        String id="";
         Scanner sc = new Scanner(System.in);
         Console console = System.console();
-        System.out.print("Enter customer id:");
-        String id = sc.nextLine();
-        char[] ch_pwd;
         try {
+        System.out.print("Enter customer id:");
+        id = sc.nextLine();
             System.out.print("Please enter your password:");
             ch_pwd = sc.nextLine().toCharArray();
         }catch(NullPointerException e){
             System.out.println("Sorry for the inconvenience caused ");
             System.out.print("please enter your password:");
             ch_pwd = sc.nextLine().toCharArray();
+        }catch(RuntimeException e){
+            System.out.println("Session expired");
+            return;
         }
         if(!td.validateUser(id,String.valueOf(ch_pwd)))
         {
@@ -112,13 +112,13 @@ class BusApplication{
             customer = td.fetchCustomer(id);
             if(customer != null) {
                 System.out.println("Sign in Successful");
-                customerScreen(booking, id,customer);
+                customerScreen( id,customer);
             }else{System.out.println("Couldn't fetch customer details");}
         }
     }
 
     // page after customer signIn is successful
-    public static void customerScreen(Booking booking,String customerId,Customer customer){
+    public static void customerScreen(String customerId,Customer customer){
         Scanner sc = new Scanner(System.in);
         System.out.println("Welcome "+ customer.getName());
         int ch;
@@ -132,7 +132,7 @@ class BusApplication{
         try{
         ch = sc.nextInt();
         switch(ch){
-            case 1:reserveSeat(booking,customerId);break;
+            case 1:reserveSeat(customerId);break;
             case 2: new BusApplicationHelper().showBookings(customerId);break;
             case 3: new BusApplicationHelper().cancelBooking();break;
             case 4:System.out.println("Signing you out...bye ");break;
@@ -141,7 +141,8 @@ class BusApplication{
             System.out.println("Selection invalid  :(");
             ch = 0;
             sc.nextLine();
-        }}while(ch != 4);
+        }
+        }while(ch != 4);
     }
 
     //method to create customer
@@ -186,67 +187,52 @@ class BusApplication{
 
 
     //Reserving a seat ion bus
-    public static void reserveSeat(Booking booking,String customerId){
+    public static void reserveSeat(String customerId) {
         String date;
         String boarding_point;
         String departure_point;
-        int selectedBusIndex;
         int fare_amount = 0;
         String seatNo = null;
         List<Integer> fare = new ArrayList<>();
-        List<Bus>  availableBuses = new ArrayList<>();
-        Scanner sc =  new Scanner(System.in);
-        System.out.print("Enter you're date of travel in dd/mm/yyyy:");
-        date = sc.nextLine();
-        if(!dateValidator(date)){
-            return;
-        }else if(!new BusApplicationHelper().validBookingDate(date)){
-            System.out.println("Booking is available only for 30 days from tomorrow , please select a date on that");
-            return;
-        }
-        System.out.print("Enter you're boarding point:");
-        boarding_point = sc.nextLine();
-        System.out.print("Enter you're departure point:");
-        departure_point = sc.nextLine();
-        availableBuses = new BusDetails().availableBuses(boarding_point,departure_point,booking.busDetails.getBuses());
-        if(null == availableBuses) return;
-        else if(availableBuses.isEmpty()) System.out.println("no buses run on the path you asked for");
-        else {
-            fare = calculateFare(boarding_point,departure_point,availableBuses);
-            new BusDetails().printBusDetails(availableBuses,fare);
-            String code;
-            System.out.print("Enter the bus code of your choice:");
-            code = sc.nextLine();
-            for(Bus bus:availableBuses){
-                if(bus.getNumberPlate().equals(code)){
-                    selectedBusIndex = availableBuses.indexOf(bus);
-                    fare_amount = fare.get(selectedBusIndex);
-                    seatNo = new BusApplicationHelper().seatAllocation(date,code);
-                    if(null != seatNo ) {
-                        fare_amount = fare_amount * seatNo.split(",").length;
+        List<Bus> availableBuses = new ArrayList<>();
+        Scanner sc = new Scanner(System.in);
+        try {
+            System.out.print("Enter you're date of travel in dd/mm/yyyy:");
+            date = sc.nextLine();
+            if (!dateValidator(date)) {
+                return;
+            } else if (!new BusApplicationHelper().validBookingDate(date)) {
+                System.out.println("Booking is available only for 30 days from tomorrow , please select a date on that");
+                return;
+            }
+            System.out.print("Enter you're boarding point:");
+            boarding_point = sc.nextLine();
+            System.out.print("Enter you're departure point:");
+            departure_point = sc.nextLine();
+            availableBuses = new BusApplicationHelper().fetchBuses(boarding_point, departure_point);
+            if (null == availableBuses) return;
+            else if (availableBuses.isEmpty()) System.out.println("no buses run on the path you asked for");
+            else {
+                new BusDetails().printBusDetails(availableBuses);
+                String code;
+                System.out.print("Enter the bus code of your choice:");
+                code = sc.nextLine();
+                for (Bus bus : availableBuses) {
+                    if (bus.getNumberPlate().equals(code)) {
+                        fare_amount = bus.getRoute().getFare();
+                        seatNo = new BusApplicationHelper().seatAllocation(date, code);
                     }
                 }
+                    if (seatNo == null) return;
+                    else {
+                        new BusApplicationHelper().updateBooking(customerId, boarding_point, departure_point, code, date, seatNo, fare_amount);
+                    }
             }
-            if(seatNo == null) return;
-            else {
-                new BusApplicationHelper().updateBooking(customerId,boarding_point,departure_point,code,date,seatNo,fare_amount);
-            }
+        }catch(InputMismatchException e){
+         System.out.println("Input invalid,please try again with valid input");
         }
     }
 
-
-    private static List<Integer> calculateFare(String startPoint, String endPoint,List<Bus> buses){
-        final int  FARE = 75;
-        List<Integer> fare  = new ArrayList<>();
-        for(Bus bus : buses){
-            if(bus.getRoutes().contains(startPoint) && bus.getRoutes().contains(endPoint) ){
-                if(bus.getRoutes().indexOf(endPoint) - bus.getRoutes().indexOf(startPoint) > 0){
-                    fare.add(FARE *(bus.getRoutes().indexOf(endPoint) - bus.getRoutes().indexOf(startPoint)));
-                }
-            }
-        }
-    return fare;
-    }
     public static boolean dateValidator(String date) {
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
         format.setLenient(false);
@@ -259,9 +245,7 @@ class BusApplication{
         return true;
     }
 
-    public BusApplicationHelper getBusApplicationHelper() {
-        return busApplicationHelper;
-    }
+
 }
 
 

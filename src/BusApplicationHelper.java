@@ -1,5 +1,6 @@
 import booking.BookingDetails;
 import booking.CustomerBookingDetailsImpl;
+import bus.Bus;
 import customer.Customer;
 import customerBookingDetails.CustomerBookingDetails;
 import test.testDB;
@@ -100,6 +101,7 @@ public class BusApplicationHelper {
     {
         testDB td = new testDB();
         List<CustomerBookingDetails> bookingDetails = td.fetchBookingDetails(customerId);
+        if (null ==  bookingDetails || bookingDetails.isEmpty()){ System.out.println("No booking details available"); return;}
         int i = 0;
         if(!bookingDetails.isEmpty()) {
             for (CustomerBookingDetails bookingDetail : bookingDetails) {
@@ -119,6 +121,11 @@ public class BusApplicationHelper {
         }
     }
 
+    public List<Bus>  fetchBuses(String startPoint, String endPoint){
+        testDB td = new testDB();
+        List<Bus> availableBuses = td.fetchBuses(startPoint,endPoint);
+        return availableBuses;
+    }
     public void cancelBooking(){
         testDB td = new testDB();
         Scanner sc = new Scanner(System.in);

@@ -23,6 +23,10 @@ public class BookingServer {
     private boolean bookingConflict = false;
     public BookingServer(){
 
+    }
+
+    public void updateTable(){
+
 
         System.out.println("   _____________");
         System.out.println(" _/_|[][][][][] | - -");
@@ -56,21 +60,24 @@ public class BookingServer {
                             break;
                         }
                     }
-                        if(!bookingConflict) {
-                            td.updateBookingDetails(customerBookingDetails.getBookingId(),
-                                    customerBookingDetails.getCustomer(),
-                                    customerBookingDetails.getStartPoint(),
-                                    customerBookingDetails.getEndPoint(),
-                                    customerBookingDetails.getBus(),
-                                    customerBookingDetails.getDate(),
-                                    Arrays.asList(customerBookingDetails.getSeatNumber().split(",")),
-                                    customerBookingDetails.getFare());
-                            td.logUpdate(customerBookingDetails.getBookingId());
-                            writer.write("Booking successful");
-                            writer.close();
-                            System.out.println("Booking Id is : " + customerBookingDetails.getBookingId());
-                        }else System.out.println("Seat is currently not available");
-            }else{System.out.println("Received a null object and it cannot be deserialized");}
+                    if(!bookingConflict) {
+                        td.updateBookingDetails(customerBookingDetails.getBookingId(),
+                                customerBookingDetails.getCustomer(),
+                                customerBookingDetails.getStartPoint(),
+                                customerBookingDetails.getEndPoint(),
+                                customerBookingDetails.getBus(),
+                                customerBookingDetails.getDate(),
+                                Arrays.asList(customerBookingDetails.getSeatNumber().split(",")),
+                                customerBookingDetails.getFare());
+                        td.logUpdate(customerBookingDetails.getBookingId(),"success");
+                        writer.write("Booking successful, you're booking id is " + customerBookingDetails.getBookingId());
+                        writer.close();
+                        System.out.println("Booking Id is : " + customerBookingDetails.getBookingId());
+                    }else{
+                        td.logUpdate(customerBookingDetails.getBookingId(),"failure");
+                        System.out.println("Seat is currently not available");
+                    }
+                }else{System.out.println("Received a null object and it cannot be deserialized");}
                 socket.close();
             }
         } catch (IOException e) {
@@ -80,10 +87,6 @@ public class BookingServer {
             System.out.println("Server Error, object reading not possible");
             throw new RuntimeException(e);
         }
-    }
-
-    public void updateTable(){
-
     }
     public static void main(String args[]){
     BookingServer server = new BookingServer();

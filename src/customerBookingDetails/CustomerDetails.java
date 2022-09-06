@@ -24,12 +24,14 @@ public class CustomerDetails {
         customer.setName(Name);
         customer.setDOB(DOB);
         customer.setGender(Gender);
+        boolean status = false;
         do{
             idCreated = PREFIX + String.valueOf(random.nextInt(1111));
         }while(customerIds.contains(idCreated));
         customer.setId(idCreated);
-        td.createCustomer(customer,String.valueOf(Password.hashCode()));
-        System.out.println("Customer Created Successfully, You're ID is : " + idCreated);
+        status = td.createCustomer(customer,String.valueOf(Password.hashCode()));
+        if(status)System.out.println("Customer Created Successfully, You're ID is : " + idCreated);
+        else System.out.println("Customer creation Failed");
     }
 
 }

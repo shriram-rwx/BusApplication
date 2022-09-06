@@ -1,7 +1,9 @@
 package test;
 
+import bus.Bus;
 import customer.Customer;
 import customerBookingDetails.CustomerBookingDetails;
+import routes.Routes;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,7 +16,6 @@ public class testDB {
 
     /*
 Immuntiy against sql injection
-
 SELECT * FROM busbooking.customercredentials WHERE idCustomer = 111 AND password = '1187246478'; // with hashing
 SELECT * FROM busbooking.customercredentials WHERE idCustomer = 111 AND password = '' or ''=''; // without hashing
 */
@@ -147,11 +148,12 @@ SELECT * FROM busbooking.customercredentials WHERE idCustomer = 111 AND password
         }
     }
 
-    public  void logUpdate(String bookingId){
-        String query = "INSERT INTO `busbooking`.`serverlogs` (`bookingId`) VALUES (?);";
+    public  void logUpdate(String bookingId,String status){
+        String query = "INSERT INTO `busbooking`.`serverlogs` (`bookingId`,`bookingStatus`) VALUES (?,?);";
  try{Connection connection = DriverManager.getConnection(url,userName,passWord);
      PreparedStatement statement = connection.prepareStatement(query);
      statement.setString(1,bookingId);
+     statement.setString(2,status);
      statement.executeUpdate();
      statement.close();
      connection.close();
@@ -242,12 +244,14 @@ SELECT * FROM busbooking.customercredentials WHERE idCustomer = 111 AND password
                bookingDetail.setFare(result.getInt("fare"));
                bookingDetails.add(bookingDetail);
             }
-            statement = connection.prepareStatement(sum_query);
-            statement.setString(1,bookingDetail.getCustomer());
-            result = statement.executeQuery();
-            System.out.println("------------------------------------------------");
-            while(result.next()) System.out.println("Money spent on booking:" + result.getString("TOTAL"));
-            System.out.println("------------------------------------------------");
+            if(null != bookingDetail) {
+                statement = connection.prepareStatement(sum_query);
+                statement.setString(1, bookingDetail.getCustomer());
+                result = statement.executeQuery();
+                System.out.println("------------------------------------------------");
+                while (result.next()) System.out.println("Money spent on booking:" + result.getString("TOTAL"));
+                System.out.println("------------------------------------------------");
+            }
             statement.close();
             connection.close();
         }catch (SQLException e){
@@ -289,6 +293,47 @@ SELECT * FROM busbooking.customercredentials WHERE idCustomer = 111 AND password
         return bookingIds;
     }
 
+    public List<Bus> fetchBuses(String startPoint, String endPoint){
+        List<Bus>availablebuses = new ArrayList<>();
+        final String query = "SELECT bus.id AS BusId, " +
+                            "bus.startTime AS StartTime, " +
+                            "bus.endTime AS EndTime,    " +
+                            "r1.route_id AS RouteId,    " +
+                            "((r1.station_order - r2.station_order)*75) AS FARE,    " +
+                            "r2.station_id AS Source,   " +
+                            "r1.station_id AS Destination   "   +
+                            "FROM busbooking.routes AS r1   "  +
+                            "JOIN busbooking.routes AS r2   " +
+                            "ON (r1.station_order > r2.station_order " +
+                            " AND r1.route_id = r2.route_id) " +
+                            "JOIN busbooking.bus AS bus     "+
+                            "ON bus.routeId = r1.route_id " +
+                            "WHERE r1.station_id = ?  and   " +
+                            "r2.station_id = ?  "   +
+                            "GROUP BY r1.route_id   "   +
+                            "ORDER BY BusId;" ;
+        try{
+            Connection connection = DriverManager.getConnection(url,userName,passWord);
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(2,startPoint);
+            statement.setString(1,endPoint);
+            ResultSet result = statement.executeQuery();
+            while(result.next()) {
+                availablebuses.add(new Bus(result.getString("BusId"),
+                        result.getString("StartTime"),
+                        result.getString("EndTime"),
+                        new Routes(result.getString("RouteId"),
+                                result.getInt("FARE"),
+                                result.getString("Source"),
+                                result.getString("Destination"))));
+            }
+            statement.close();
+            connection.close();
+        }catch (SQLException e) {
+            System.out.println("Error in fetching bus details");
+        }
+        return availablebuses;
+    }
     public static String  formatDateForDb(String Date){
       String resultDate = "";
       resultDate = Date.substring(6) + "-"+Date.substring(3,5) + "-"+Date.substring(0,2);

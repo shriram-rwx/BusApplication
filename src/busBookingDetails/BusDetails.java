@@ -33,12 +33,12 @@ public class BusDetails {
             ResultSet result = statement.executeQuery(query);
 
             while(result.next()) {
-                buses.add(new Bus(result.getString("id"), result.getString("startTime"), result.getString("endTime")));
+             //   buses.add(new Bus(result.getString("id"), result.getString("startTime"), result.getString("endTime")));
             }
             line = reader.readLine();// checking our file has atleast one value
             if(line == null){System.out.println("error in mapping buses and routes"); return;}
             for(Bus bus: buses){
-                bus.setRoutes(Arrays.asList(line.split(",")));
+              //  bus.setRoutes(Arrays.asList(line.split(",")));
                 if((line = reader.readLine()) == null){
                     reader.close();
                     reader = new BufferedReader(new FileReader(CSV_PATH));
@@ -115,33 +115,15 @@ public class BusDetails {
 */
     }
 
-    public List<Bus> availableBuses(String startPoint, String endPoint,List<Bus> buses){
-        final int  FARE = 75;
-        List<Bus> routing = new ArrayList<>();
-        for(Bus bus : buses){
-            if(bus.getRoutes().contains(startPoint) && bus.getRoutes().contains(endPoint) ){
-                if(bus.getRoutes().indexOf(endPoint) - bus.getRoutes().indexOf(startPoint) > 0){
-                    routing.add(bus);
-                }else return routing;
-            }
-        }
-        if(!routing.isEmpty()) return routing;
-    System.out.println("Start/end Point invalid");
-    return null;
-    }
 
-    public void printBusDetails(List<Bus> buses,List<Integer> fare){
-        int i=0;
+
+    public void printBusDetails(List<Bus> buses){
         for(Bus bus:buses){
             System.out.println("------------------");
             System.out.println("Bus number:" + bus.getNumberPlate());
             System.out.println("Bus start Time:" + bus.getStartTime());
             System.out.println("Bus end Time:" +bus.getEndTime());
-            System.out.println("Fare is:" + fare.get(i++));
-            System.out.print("Routes");
-            for(String routes : bus.getRoutes()){
-                System.out.print("->"+routes);
-            }
+            System.out.println("Fare is:" + bus.getRoute().getFare());
             System.out.println();
         }
     }
