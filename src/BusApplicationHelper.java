@@ -1,5 +1,4 @@
-import booking.BookingDetails;
-import booking.CustomerBookingDetailsImpl;
+
 import bus.Bus;
 import customer.Customer;
 import customerBookingDetails.CustomerBookingDetails;
@@ -22,10 +21,11 @@ public class BusApplicationHelper {
     private PrintWriter writer = null;
     private static final int   PORT = 2022;
 
+    private testDB testDb = new testDB();
+
     public  void updateBooking(String customerId,String boarding_point, String departure_point,
                                String optedBus,String date, String seatNo,int fare){
-        BookingDetails bookingDetails = new CustomerBookingDetailsImpl();
-        testDB td = new testDB();
+        testDB td = getTestDb();
         List<String> bookingIds = td.fetchBookingIds();
         String bookingId;
         final String PREFIX = "111";
@@ -61,13 +61,13 @@ public class BusApplicationHelper {
             }
         return result;
     }
-    public  String seatAllocation(String date, String busNumber,String startingPoint){
-        testDB td = new testDB();
+    public  String seatAllocation(String date, String busNumber,String startingPoint,String endPoint){
+        testDB td = getTestDb();
         Scanner sc =  new Scanner(System.in);
         int numberOfSeats;
         String seatNo = "";
         try {
-            List<String> allocated = td.fetchSeats(date, busNumber,startingPoint);
+            List<String> allocated = td.fetchSeats(date, busNumber,startingPoint,endPoint);
             int num = 0;
             for (int i = 0; i < 10; i++) {
                 for (int j = 0; j < 4; j++) {
@@ -99,7 +99,7 @@ public class BusApplicationHelper {
 
     public  void showBookings(String customerId)
     {
-        testDB td = new testDB();
+        testDB td = getTestDb();
         List<CustomerBookingDetails> bookingDetails = td.fetchBookingDetails(customerId);
         if (null ==  bookingDetails || bookingDetails.isEmpty()){ System.out.println("No booking details available"); return;}
         int i = 0;
@@ -122,12 +122,12 @@ public class BusApplicationHelper {
     }
 
     public List<Bus>  fetchBuses(String startPoint, String endPoint){
-        testDB td = new testDB();
+        testDB td = getTestDb();
         List<Bus> availableBuses = td.fetchBuses(startPoint,endPoint);
         return availableBuses;
     }
     public void cancelBooking(){
-        testDB td = new testDB();
+        testDB td = getTestDb();
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter booking ID to cancel: ");
         if(td.cancelBooking(sc.nextLine())) System.out.println("Booking canceled");
@@ -156,6 +156,13 @@ public class BusApplicationHelper {
         return availableDates.contains(date);
     }
 
+    public boolean validateUser(String id,String passWord){
+        return getTestDb().validateUser(id,passWord);
+    }
+
+    public Customer getCustomer(String id){
+        return getTestDb().fetchCustomer(id);
+    }
     public String md5Password(String password){
         MessageDigest md5 = null;
         try {
@@ -191,5 +198,23 @@ public class BusApplicationHelper {
         System.out.println("|=|||=======================|");
         System.out.println("[_|j||(O)\\__________|(O)\\___]");
         System.out.println();
+    }
+
+    public void printBusDetails(List<Bus> buses) {
+        for (Bus bus : buses) {
+            System.out.println("------------------");
+            System.out.println("Bus number:" + bus.getNumberPlate());
+            System.out.println("Bus start Time:" + bus.getStartTime());
+            System.out.println("Bus end Time:" + bus.getEndTime());
+            System.out.println("Fare is:" + bus.getRoute().getFare());
+            System.out.println();
+        }
+    }
+    public testDB getTestDb() {
+        return testDb;
+    }
+
+    public void setTestDb(testDB testDb) {
+        this.testDb = testDb;
     }
 }

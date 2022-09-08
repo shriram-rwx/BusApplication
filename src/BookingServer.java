@@ -45,7 +45,7 @@ public class BookingServer {
                 CustomerBookingDetails customerBookingDetails = (CustomerBookingDetails) inStream.readObject();
                 if(null != customerBookingDetails)
                 {
-                    List<String> bookedSeats = td.fetchSeats(customerBookingDetails.getDate(),customerBookingDetails.getBus(),customerBookingDetails.getStartPoint());
+                    List<String> bookedSeats = td.fetchSeats(customerBookingDetails.getDate(),customerBookingDetails.getBus(),customerBookingDetails.getStartPoint(),customerBookingDetails.getEndPoint());
                     for(String seat:bookedSeats){
                         if(Arrays.asList(customerBookingDetails.getSeatNumber().split(",")).contains(seat)) {
                             bookingConflict = true;

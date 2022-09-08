@@ -2,21 +2,30 @@ import java.util.*;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 import customerBookingDetails.*;
 import bus.*;
-import busBookingDetails.*;
 import customer.*;
-import booking.*;
-import test.testDB;
-
 
 class BusApplication extends  Thread {
 static boolean sessionBoolean = false;
-
+/*
+* Bus booking application
+* Provides functionalities like
+* customer creation
+* customer sign in
+* Book a bus , maximum of 6 tickets in a single booking can be done
+* View bookings done by a customer
+* Cancel a booking
+* In a particular ride same seat can be booked twice
+* considered the destination point of first booking is prior to the
+* boarding point of the second booking
+*
+*
+* SQL Database connectivity is used in back end
+* TO avoid concurrent booking , updating the booking details is channeled via
+* a server socket  to db
+* Socket can handle a maximum of 100instances in a given moment of time in FIFO fashion*/
 private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
 
      public static void main(String args[])
@@ -27,7 +36,7 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
         }
         catch(Exception exc){
             exc.printStackTrace();
-            System.out.println(exc);
+            System.out.println("Error in starting application");
         }
 
     }
@@ -75,7 +84,6 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
 
     // method to check if the customer is a valid person
     public  void customerSignIn(){
-        testDB td = new testDB();
         Customer customer ;
         String ch_pwd;
         String id="";
@@ -90,12 +98,12 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
             System.out.print("please enter your password:");
             ch_pwd = getBusApplicationHelper().md5Password(sc.nextLine());
         }
-        if(!td.validateUser(id,ch_pwd))
+        if(!getBusApplicationHelper().validateUser(id,ch_pwd))
         {
             System.out.println("User name / Password incorrect");
             return;
         }else {
-            customer = td.fetchCustomer(id);
+            customer = getBusApplicationHelper().getCustomer(id);
             if(customer != null) {
                 System.out.println("Sign in Successful");
                 customerScreen( id,customer);
@@ -109,7 +117,6 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
         System.out.println("Welcome "+ customer.getName());
         int ch = 0;
         do{
-        sessionBoolean = false;
         System.out.println("Please select any one of the following options");
         System.out.println("1.Book a bus");
         System.out.println("2.Show Bookings");
@@ -118,7 +125,6 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
         System.out.print("Enter you're choice.....");
         try {
         ch = sc.nextInt();
-        sessionBoolean = true;
         switch(ch){
             case 1:reserveSeat(customerId);break;
             case 2: getBusApplicationHelper().showBookings(customerId);break;
@@ -202,14 +208,14 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
             if (null == availableBuses) return;
             else if (availableBuses.isEmpty()) System.out.println("no buses run on the path you asked for");
             else {
-                new BusDetails().printBusDetails(availableBuses);
+                getBusApplicationHelper().printBusDetails(availableBuses);
                 String code;
                 System.out.print("Enter the bus code of your choice:");
                 code = sc.nextLine();
                 for (Bus bus : availableBuses) {
                     if (bus.getNumberPlate().equals(code)) {
                         fare_amount = bus.getRoute().getFare();
-                        seatNo = getBusApplicationHelper().seatAllocation(date, code,boarding_point);
+                        seatNo = getBusApplicationHelper().seatAllocation(date, code,boarding_point,departure_point);
                     }
                 }
                     if (seatNo == null) return;
@@ -243,9 +249,6 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
         this.busApplicationHelper = busApplicationHelper;
     }
 }
-
-
-
 
 enum Gender{
     MALE,
