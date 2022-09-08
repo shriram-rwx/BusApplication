@@ -36,12 +36,10 @@ public class BusApplicationHelper {
 
     public String connectServer(CustomerBookingDetails customerBookingDetails){
         String result = null;
-        while(!isConnected){
             try {
                 socket = new Socket("localhost",PORT);
                 socket.setSoTimeout(10*1000);
                 System.out.println("Request being processed by server");
-                isConnected = true;
                 outputStream = new  ObjectOutputStream(socket.getOutputStream());
                 outputStream.writeObject(customerBookingDetails);
                 outputStream.flush();
@@ -58,16 +56,15 @@ public class BusApplicationHelper {
                 System.out.println("Error in reaching Server");
                 throw new RuntimeException(e);
             }
-        }
         return result;
     }
-    public  String seatAllocation(String date, String busNumber){
+    public  String seatAllocation(String date, String busNumber,String startingPoint){
         testDB td = new testDB();
         Scanner sc =  new Scanner(System.in);
         int numberOfSeats;
         String seatNo = "";
         try {
-            List<String> allocated = td.fetchSeats(date, busNumber);
+            List<String> allocated = td.fetchSeats(date, busNumber,startingPoint);
             int num = 0;
             for (int i = 0; i < 10; i++) {
                 for (int j = 0; j < 4; j++) {

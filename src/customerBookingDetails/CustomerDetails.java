@@ -17,7 +17,7 @@ public class CustomerDetails {
     final int MIN = 9999;
     String idCreated = null;
 
-    public void createCustomer(String Name,String DOB,String Gender,final String Password){
+    public synchronized void createCustomer(String Name,String DOB,String Gender,final String Password){
         testDB td = new testDB();
         List<String> customerIds = td.fetchCustomerIds();
         Customer customer = new Customer();

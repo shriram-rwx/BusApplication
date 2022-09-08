@@ -15,12 +15,15 @@ import test.testDB;
 
 
 class BusApplication extends  Thread {
+static boolean sessionBoolean = false;
+
+private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
 
      public static void main(String args[])
     {
         try{
             CustomerDetails cd =  new CustomerDetails();
-            startApplication(cd);
+            new BusApplication().startApplication(cd);
         }
         catch(Exception exc){
             exc.printStackTrace();
@@ -29,7 +32,7 @@ class BusApplication extends  Thread {
 
     }
 
-    private static void startApplication(CustomerDetails cd){
+    private void startApplication(CustomerDetails cd){
 
 //customer validation
         Scanner sc = new Scanner(System.in);
@@ -84,13 +87,12 @@ class BusApplication extends  Thread {
 
 
     // method to check if the customer is a valid person
-    public static void customerSignIn(){
+    public  void customerSignIn(){
         testDB td = new testDB();
         Customer customer ;
         char[] ch_pwd;
         String id="";
         Scanner sc = new Scanner(System.in);
-        Console console = System.console();
         try {
         System.out.print("Enter customer id:");
         id = sc.nextLine();
@@ -100,9 +102,6 @@ class BusApplication extends  Thread {
             System.out.println("Sorry for the inconvenience caused ");
             System.out.print("please enter your password:");
             ch_pwd = sc.nextLine().toCharArray();
-        }catch(RuntimeException e){
-            System.out.println("Session expired");
-            return;
         }
         if(!td.validateUser(id,String.valueOf(ch_pwd)))
         {
@@ -118,23 +117,25 @@ class BusApplication extends  Thread {
     }
 
     // page after customer signIn is successful
-    public static void customerScreen(String customerId,Customer customer){
+    public  void customerScreen(String customerId,Customer customer){
         Scanner sc = new Scanner(System.in);
         System.out.println("Welcome "+ customer.getName());
-        int ch;
+        int ch = 0;
         do{
+        sessionBoolean = false;
         System.out.println("Please select any one of the following options");
         System.out.println("1.Book a bus");
         System.out.println("2.Show Bookings");
         System.out.println("3.Cancel Booking");
         System.out.println("4.Sign out");
         System.out.print("Enter you're choice.....");
-        try{
+        try {
         ch = sc.nextInt();
+        sessionBoolean = true;
         switch(ch){
             case 1:reserveSeat(customerId);break;
-            case 2: new BusApplicationHelper().showBookings(customerId);break;
-            case 3: new BusApplicationHelper().cancelBooking();break;
+            case 2: getBusApplicationHelper().showBookings(customerId);break;
+            case 3: getBusApplicationHelper().cancelBooking();break;
             case 4:System.out.println("Signing you out...bye ");break;
             default:System.out.println("Selection invalid  :(");
         }  }catch(InputMismatchException exception){
@@ -146,7 +147,7 @@ class BusApplication extends  Thread {
     }
 
     //method to create customer
-    public static void createCustomer(CustomerDetails cd){
+    public  void createCustomer(CustomerDetails cd){
         String Name;
         String DOB;
         String gender;
@@ -187,7 +188,7 @@ class BusApplication extends  Thread {
 
 
     //Reserving a seat ion bus
-    public static void reserveSeat(String customerId) {
+    public  void reserveSeat(String customerId) {
         String date;
         String boarding_point;
         String departure_point;
@@ -201,7 +202,7 @@ class BusApplication extends  Thread {
             date = sc.nextLine();
             if (!dateValidator(date)) {
                 return;
-            } else if (!new BusApplicationHelper().validBookingDate(date)) {
+            } else if (!getBusApplicationHelper().validBookingDate(date)) {
                 System.out.println("Booking is available only for 30 days from tomorrow , please select a date on that");
                 return;
             }
@@ -209,7 +210,7 @@ class BusApplication extends  Thread {
             boarding_point = sc.nextLine();
             System.out.print("Enter you're departure point:");
             departure_point = sc.nextLine();
-            availableBuses = new BusApplicationHelper().fetchBuses(boarding_point, departure_point);
+            availableBuses = getBusApplicationHelper().fetchBuses(boarding_point, departure_point);
             if (null == availableBuses) return;
             else if (availableBuses.isEmpty()) System.out.println("no buses run on the path you asked for");
             else {
@@ -220,12 +221,12 @@ class BusApplication extends  Thread {
                 for (Bus bus : availableBuses) {
                     if (bus.getNumberPlate().equals(code)) {
                         fare_amount = bus.getRoute().getFare();
-                        seatNo = new BusApplicationHelper().seatAllocation(date, code);
+                        seatNo = getBusApplicationHelper().seatAllocation(date, code,boarding_point);
                     }
                 }
                     if (seatNo == null) return;
                     else {
-                        new BusApplicationHelper().updateBooking(customerId, boarding_point, departure_point, code, date, seatNo, fare_amount);
+                        getBusApplicationHelper().updateBooking(customerId, boarding_point, departure_point, code, date, seatNo, fare_amount);
                     }
             }
         }catch(InputMismatchException e){
@@ -245,8 +246,16 @@ class BusApplication extends  Thread {
         return true;
     }
 
+    public BusApplicationHelper getBusApplicationHelper() {
+        return busApplicationHelper;
+    }
 
+    public void setBusApplicationHelper(BusApplicationHelper busApplicationHelper) {
+        this.busApplicationHelper = busApplicationHelper;
+    }
 }
+
+
 
 
 enum Gender{

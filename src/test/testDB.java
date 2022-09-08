@@ -162,6 +162,52 @@ SELECT * FROM busbooking.customercredentials WHERE idCustomer = 111 AND password
      System.out.println("Couldn't log data in server");
  }
     }
+
+    public List<String> fetchSeats(String Date,String busId,String startPoint){
+        List<String> seatNo = new ArrayList<>();
+        int stationOrder = 0;
+        final String stationOrder_query =
+                "SELECT routes.station_order AS `order`" +
+                        " FROM busbooking.bus  AS bus JOIN " +
+                        "busbooking.routes AS routes " +
+                        "ON bus.routeId = routes.route_id "+
+                        "WHERE bus.id = ? and routes.station_id = ?;";
+        final String seatFetch_query =
+                "SELECT seatNo FROM busbooking.seating WHERE " +
+                "bookingId IN (" +
+                "SELECT booking.idbooking FROM busbooking.booking AS booking " +
+                "JOIN busbooking.bus AS bus " +
+                "ON bus.id = booking.busId " +
+                "JOIN busbooking.routes AS routes_1  " +
+                "ON (bus.routeId = routes_1.route_id AND booking.startPoint = routes_1.station_id) " +
+                "JOIN busbooking.routes AS routes_2 " +
+                "ON (bus.routeId = routes_2.route_id AND booking.endPoint = routes_2.station_id) " +
+                "WHERE routes_2.station_order > ?  AND " +
+                "(booking.date = ? and booking.busId=?));";
+        try{
+            Connection connection = DriverManager.getConnection(url,userName,passWord);
+            PreparedStatement statement = connection.prepareStatement(stationOrder_query);
+            statement.setString(1,busId);
+            statement.setString(2,startPoint);
+            ResultSet result = statement.executeQuery();
+            if(result.next()) stationOrder = result.getInt("order");
+            statement = connection.prepareStatement(seatFetch_query);
+            statement.setInt(1,stationOrder);
+            statement.setString(2,formatDateForDb(Date));
+            statement.setString(3,busId);
+            result = statement.executeQuery();
+            while(result.next()){
+                seatNo.add(result.getString("seatNo"));
+            }
+            statement.close();
+            connection.close();
+        }catch(SQLException e){
+            System.out.println("Error in fetching seats");
+            e.printStackTrace();
+        }
+        return seatNo;
+    }
+
     public List<String> fetchSeats(String Date,String busId){
         List<String> seatNo = new ArrayList<>();
         try{
