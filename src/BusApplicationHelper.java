@@ -6,8 +6,11 @@ import customerBookingDetails.CustomerBookingDetails;
 import test.testDB;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class BusApplicationHelper {
@@ -151,5 +154,42 @@ public class BusApplicationHelper {
             }
         }
         return availableDates.contains(date);
+    }
+
+    public String md5Password(String password){
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md5.digest(password.getBytes());
+            BigInteger number =new BigInteger(1,messageDigest);
+            String hashText = number.toString(16);
+            while (hashText.length() < 16)hashText = "0" + hashText;
+            return hashText;
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("Error in hashing the password");
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void printRoutes(){
+        System.out.println();
+        System.out.println("We are Operating in");
+        System.out.println("|Chennai-CMBT->Tambaram->Perungalathur->Chengalpet->Vilupuram->Trichy|");
+        System.out.println("|Chennai-CMBT->Kanchipuram->Vellore->Krishnagiri->Banglore|");
+        System.out.println("|Chennai-CMBT->Kanchipuram->Chengalpet->Panruti->Neyveli|");
+        System.out.println("|Chennai-CMBT->Chengalpet->Vilupuram->Trichy->Madurai->Tirunelveli|");
+        System.out.println("|Chennai-CMBT->Chengalpet->Trichy->Madurai->Tirunelveli->Thoothukudi|");
+        System.out.println();
+        System.out.println();
+    }
+
+    public void printBus(){
+        System.out.println("                          __");
+        System.out.println(" .-----------------------'  |");
+        System.out.println("/| _ .---. .---. .---. .---.|");
+        System.out.println("|j||||___| |___| |___| |___||");
+        System.out.println("|=|||=======================|");
+        System.out.println("[_|j||(O)\\__________|(O)\\___]");
+        System.out.println();
     }
 }

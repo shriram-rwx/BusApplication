@@ -23,7 +23,7 @@ SELECT * FROM busbooking.customercredentials WHERE idCustomer = 111 AND password
         try {
             String query = "SELECT * FROM busbooking.customercredentials " +
                     "WHERE idCustomer = " + userId +
-                    " AND password = " +"'"+password.hashCode()+"'" + ";";
+                    " AND password = " +"'"+password+"'" + ";";
             Connection connection = DriverManager.getConnection(url, userName, passWord);
             Statement statement = connection.createStatement();
             ResultSet result = statement.executeQuery(query);

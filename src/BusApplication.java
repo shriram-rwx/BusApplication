@@ -37,21 +37,8 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
 //customer validation
         Scanner sc = new Scanner(System.in);
         int choice = 0;//setting the choice to 0 which is a default condition
-
-        System.out.println("We are Operating in");
-        System.out.println("|Chennai-CMBT->Tambaram->Perungalathur->Chengalpet->Vilupuram->Trichy|");
-        System.out.println("|Chennai-CMBT->Kanchipuram->Vellore->Krishnagiri->Banglore|");
-        System.out.println("|Chennai-CMBT->Kanchipuram->Chengalpet->Panruti->Neyveli|");
-        System.out.println("|Chennai-CMBT->Chengalpet->Vilupuram->Trichy->Madurai->Tirunelveli|");
-        System.out.println("|Chennai-CMBT->Chengalpet->Trichy->Madurai->Tirunelveli->Thoothukudi|");
-
-                    System.out.println("                          __");
-                    System.out.println(" .-----------------------'  |");
-                    System.out.println("/| _ .---. .---. .---. .---.|");
-                    System.out.println("|j||||___| |___| |___| |___||");
-                    System.out.println("|=|||=======================|");
-                    System.out.println("[_|j||(O)\\__________|(O)\\___]");
-                    System.out.println();
+        getBusApplicationHelper().printBus();
+        getBusApplicationHelper().printRoutes();
 
         System.out.println(" _______________________");
         System.out.println("|Bus Booking Application|");
@@ -90,20 +77,20 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
     public  void customerSignIn(){
         testDB td = new testDB();
         Customer customer ;
-        char[] ch_pwd;
+        String ch_pwd;
         String id="";
         Scanner sc = new Scanner(System.in);
         try {
         System.out.print("Enter customer id:");
         id = sc.nextLine();
             System.out.print("Please enter your password:");
-            ch_pwd = sc.nextLine().toCharArray();
+            ch_pwd = getBusApplicationHelper().md5Password(sc.nextLine());
         }catch(NullPointerException e){
             System.out.println("Sorry for the inconvenience caused ");
             System.out.print("please enter your password:");
-            ch_pwd = sc.nextLine().toCharArray();
+            ch_pwd = getBusApplicationHelper().md5Password(sc.nextLine());
         }
-        if(!td.validateUser(id,String.valueOf(ch_pwd)))
+        if(!td.validateUser(id,ch_pwd))
         {
             System.out.println("User name / Password incorrect");
             return;
@@ -171,7 +158,7 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
             }else {System.out.println("PLease make a valid selection"); continue;}
             try {
                 System.out.print("Please enter your password:");
-                password = sc.nextLine();
+                password = getBusApplicationHelper().md5Password(sc.nextLine());
                    cd.createCustomer(Name, DOB, gender, password);
                     break;
             }
@@ -197,6 +184,7 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
         List<Integer> fare = new ArrayList<>();
         List<Bus> availableBuses = new ArrayList<>();
         Scanner sc = new Scanner(System.in);
+        getBusApplicationHelper().printRoutes();
         try {
             System.out.print("Enter you're date of travel in dd/mm/yyyy:");
             date = sc.nextLine();
@@ -226,6 +214,7 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
                 }
                     if (seatNo == null) return;
                     else {
+                        fare_amount = fare_amount*seatNo.split(",").length;
                         getBusApplicationHelper().updateBooking(customerId, boarding_point, departure_point, code, date, seatNo, fare_amount);
                     }
             }

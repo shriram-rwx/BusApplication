@@ -33,7 +33,6 @@ public class Booking {
                     Date = Date + String.valueOf(calendar.get(Calendar.MONTH)) + "/";
                 }
                 Date = Date + String.valueOf(calendar.get(Calendar.YEAR));
-                busDetails.testBusCreate();
                 BusMap.put(Date, busDetails);
             }
         }
