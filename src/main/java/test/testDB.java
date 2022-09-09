@@ -1,10 +1,11 @@
-package test;
+package main.java.test;
 
-import Constants.SQLQueries;
-import bus.Bus;
-import customer.Customer;
-import customerBookingDetails.CustomerBookingDetails;
-import routes.Routes;
+
+import main.java.Constants.SQLQueries;
+import main.java.bus.Bus;
+import main.java.customer.Customer;
+import main.java.customerBookingDetails.CustomerBookingDetails;
+import main.java.routes.Routes;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -119,8 +120,8 @@ public class testDB {
             PreparedStatement statement = connection.prepareStatement(SQLQueries.BOOKING_UPDATION_QUERY);
             statement.setString(1,bookingId);
             statement.setString(2,customerId);
-            statement.setString(3,startPoint);
-            statement.setString(4,endPoint);
+            statement.setString(3,startPoint.toUpperCase());
+            statement.setString(4,endPoint.toUpperCase());
             statement.setString(5,busId);
             statement.setString(6,formatDateForDb(date));
             statement.setInt(7,fare);

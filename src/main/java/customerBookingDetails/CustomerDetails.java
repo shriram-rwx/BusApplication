@@ -1,12 +1,10 @@
-package customerBookingDetails;
+package main.java.customerBookingDetails;
 
 
-import customer.Customer;
-import test.testDB;
+import main.java.customer.Customer;
+import main.java.test.testDB;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 //Customer details class consists customer details and their login credentials

@@ -1,4 +1,4 @@
-package customerBookingDetails;
+package main.java.customerBookingDetails;
 
 import java.io.Serializable;
 

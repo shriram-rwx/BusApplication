@@ -1,6 +1,8 @@
-package bus;
+package main.java.bus;
 
-import routes.Routes;
+
+
+import main.java.routes.Routes;
 
 import java.util.*;
 public class Bus{

@@ -1,4 +1,4 @@
-package Constants;
+package main.java.Constants;
 
 public class SQLQueries {
 

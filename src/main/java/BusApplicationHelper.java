@@ -1,8 +1,9 @@
+package main.java;
 
-import bus.Bus;
-import customer.Customer;
-import customerBookingDetails.CustomerBookingDetails;
-import test.testDB;
+import main.java.bus.Bus;
+import main.java.customer.Customer;
+import main.java.customerBookingDetails.CustomerBookingDetails;
+import main.java.test.testDB;
 
 import java.io.*;
 import java.math.BigInteger;

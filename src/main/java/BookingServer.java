@@ -1,5 +1,7 @@
-import customerBookingDetails.CustomerBookingDetails;
-import test.testDB;
+package main.java;
+
+import main.java.customerBookingDetails.CustomerBookingDetails;
+import main.java.test.testDB;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

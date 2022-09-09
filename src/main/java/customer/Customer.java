@@ -1,4 +1,4 @@
-package customer;
+package main.java.customer;
 import java.util.*;
 public class Customer{
     private String ID;

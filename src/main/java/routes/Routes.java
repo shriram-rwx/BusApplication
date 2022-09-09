@@ -1,4 +1,4 @@
-package routes;
+package main.java.routes;
 
 public class Routes {
     private String route_id;

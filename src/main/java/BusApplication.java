@@ -1,11 +1,15 @@
+package main.java;
+
+import main.java.bus.Bus;
+import main.java.customer.Customer;
+import main.java.customerBookingDetails.CustomerDetails;
+
 import java.util.*;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
-import customerBookingDetails.*;
-import bus.*;
-import customer.*;
+
 
 class BusApplication extends  Thread {
 static boolean sessionBoolean = false;
@@ -112,7 +116,7 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
     }
 
     // page after customer signIn is successful
-    public  void customerScreen(String customerId,Customer customer){
+    public  void customerScreen(String customerId, Customer customer){
         Scanner sc = new Scanner(System.in);
         System.out.println("Welcome "+ customer.getName());
         int ch = 0;
