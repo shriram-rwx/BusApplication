@@ -157,18 +157,24 @@ public class testDB {
 
     public List<String> fetchSeats(String Date,String busId,String startPoint,String endPoint){
         List<String> seatNo = new ArrayList<>();
-        int stationOrder = 0;
+        int stationOrder_1 = 0;
+        int stationOrder_2 = 0;
         try{
             Connection connection = DriverManager.getConnection(url,userName,passWord);
             PreparedStatement statement = connection.prepareStatement(SQLQueries.FETCHING_SEAT_STATION_ORDER_QUERY);
             statement.setString(1,busId);
             statement.setString(2,startPoint);
             ResultSet result = statement.executeQuery();
-            if(result.next()) stationOrder = result.getInt("order");
+            if(result.next()) stationOrder_1 = result.getInt("order");
+            statement.setString(1,busId);
+            statement.setString(2,endPoint);
+            result = statement.executeQuery();
+            if(result.next()) stationOrder_2 = result.getInt("order");
             statement = connection.prepareStatement(SQLQueries.FETCHING_BOOKED_SEATS_QUERY);
-            statement.setInt(1,stationOrder);
+            statement.setInt(1,stationOrder_1);
             statement.setString(2,formatDateForDb(Date));
             statement.setString(3,busId);
+            statement.setInt(4,stationOrder_2);
             result = statement.executeQuery();
             while(result.next()){
                 seatNo.add(result.getString("seatNo"));
@@ -177,7 +183,6 @@ public class testDB {
             connection.close();
         }catch(SQLException e){
             System.out.println("Error in fetching seats");
-            e.printStackTrace();
         }
         return seatNo;
     }
