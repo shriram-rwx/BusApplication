@@ -65,10 +65,16 @@ public class BusApplicationHelper {
     public  String seatAllocation(String date, String busNumber,String startingPoint,String endPoint){
         testDB td = getTestDb();
         Scanner sc =  new Scanner(System.in);
+        CustomerBookingDetails customerBookingDetails = null;
         int numberOfSeats;
         String seatNo = "";
         try {
-            List<String> allocated = td.fetchSeats(date, busNumber,startingPoint,endPoint);
+            customerBookingDetails = new CustomerBookingDetails();
+            customerBookingDetails.setDate(date);
+            customerBookingDetails.setBus(busNumber);
+            customerBookingDetails.setStartPoint(startingPoint);
+            customerBookingDetails.setEndPoint(endPoint);
+            List<String> allocated = td.fetchSeats(customerBookingDetails);
             int num = 0;
             for (int i = 0; i < 10; i++) {
                 for (int j = 0; j < 4; j++) {
@@ -127,7 +133,9 @@ public class BusApplicationHelper {
         List<Bus> availableBuses = td.fetchBuses(startPoint,endPoint);
         return availableBuses;
     }
-    public void cancelBooking(){
+    public void cancelBooking(String customerId){
+        System.out.println("Available booking details are");
+        showBookings(customerId);
         testDB td = getTestDb();
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter booking ID to cancel: ");
@@ -139,7 +147,7 @@ public class BusApplicationHelper {
         List<String> availableDates = new ArrayList<>();
         for(int i=0;i<60;i++) {
             calendar.add(Calendar.DATE, 1);
-            if (i > 30){
+            if (i >= 30){
                 String Date;
                 String Day = String.valueOf(calendar.get(Calendar.DATE));
                 String Month  = String.valueOf(calendar.get(Calendar.MONTH));

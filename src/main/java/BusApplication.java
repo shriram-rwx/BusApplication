@@ -2,6 +2,7 @@ package main.java;
 
 import main.java.bus.Bus;
 import main.java.customer.Customer;
+import main.java.customerBookingDetails.CustomerBookingDetails;
 import main.java.customerBookingDetails.CustomerDetails;
 
 import java.util.*;
@@ -11,7 +12,12 @@ import java.text.ParseException;
 
 
 
-class BusApplication extends  Thread {
+class BusApplication extends Thread {
+
+    public  void run(){
+        CustomerDetails cd =  new CustomerDetails();
+        startApplication(cd);
+    }
 static boolean sessionBoolean = false;
 /*
 * Bus booking application
@@ -35,17 +41,17 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
      public static void main(String args[])
     {
         try{
-            CustomerDetails cd =  new CustomerDetails();
-            new BusApplication().startApplication(cd);
+            BusApplication busApp = new BusApplication();
+           Thread busApplication = new Thread(busApp);
+           busApplication.start();
         }
         catch(Exception exc){
-            exc.printStackTrace();
             System.out.println("Error in starting application");
         }
 
     }
 
-    private void startApplication(CustomerDetails cd){
+    private  synchronized void  startApplication(CustomerDetails cd){
 
 //customer validation
         Scanner sc = new Scanner(System.in);
@@ -132,7 +138,7 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
         switch(ch){
             case 1:reserveSeat(customerId);break;
             case 2: getBusApplicationHelper().showBookings(customerId);break;
-            case 3: getBusApplicationHelper().cancelBooking();break;
+            case 3: getBusApplicationHelper().cancelBooking(customerId);break;
             case 4:System.out.println("Signing you out...bye ");break;
             default:System.out.println("Selection invalid  :(");
         }  }catch(InputMismatchException exception){
@@ -191,8 +197,7 @@ private BusApplicationHelper  busApplicationHelper = new BusApplicationHelper();
         String departure_point;
         int fare_amount = 0;
         String seatNo = null;
-        List<Integer> fare = new ArrayList<>();
-        List<Bus> availableBuses = new ArrayList<>();
+        List<Bus> availableBuses;
         Scanner sc = new Scanner(System.in);
         getBusApplicationHelper().printRoutes();
         try {

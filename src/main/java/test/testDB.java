@@ -95,9 +95,9 @@ public class testDB {
             Statement statement = connection.createStatement();
             statement.addBatch(query_1);
             statement.addBatch(query_2);
-            int result [] = statement.executeBatch();
-            for(int i =0;i<result.length;i++){
-                if(result[i] == -1){
+            int[] result = statement.executeBatch();
+            for (int j : result) {
+                if (j == -1) {
                     System.out.println("record not found");
                     statement.close();
                     connection.close();
@@ -113,27 +113,47 @@ public class testDB {
         }
     }
 
-    public void updateBookingDetails(String bookingId,String customerId,String startPoint,String endPoint,
-                                     String busId,String date,List<String> seats,int fare){
+    public void updateBookingDetails(CustomerBookingDetails customerBookingDetails){
         try{
             Connection connection = DriverManager.getConnection(url,userName,passWord);
             PreparedStatement statement = connection.prepareStatement(SQLQueries.BOOKING_UPDATION_QUERY);
-            statement.setString(1,bookingId);
-            statement.setString(2,customerId);
-            statement.setString(3,startPoint.toUpperCase());
-            statement.setString(4,endPoint.toUpperCase());
-            statement.setString(5,busId);
-            statement.setString(6,formatDateForDb(date));
-            statement.setInt(7,fare);
-            int res = statement.executeUpdate();
+           if(null != customerBookingDetails.getBookingId()) {
+               statement.setString(1, customerBookingDetails.getBookingId());
+           }
+
+           if(null != customerBookingDetails.getCustomer()) {
+               statement.setString(2, customerBookingDetails.getCustomer());
+           }
+
+           if(null != customerBookingDetails.getStartPoint()) {
+               statement.setString(3, customerBookingDetails.getStartPoint().toUpperCase());
+           }
+
+           if(null != customerBookingDetails.getEndPoint()) {
+               statement.setString(4, customerBookingDetails.getEndPoint().toUpperCase());
+           }
+
+           if(null != customerBookingDetails.getBookingId()){
+                statement.setString(5, customerBookingDetails.getBookingId());
+            }
+
+           if(null != customerBookingDetails.getDate()) {
+               statement.setString(6, formatDateForDb(customerBookingDetails.getDate()));
+           }
+
+               statement.setInt(7, customerBookingDetails.getFare());
+
+
+           int res = statement.executeUpdate();
             if(res != -1) System.out.println("Booking successful");
             else System.out.println("Booking Failed");
             statement = connection.prepareStatement(SQLQueries.BOOKING_UPDATION_SEAT_QUERY);
-            for(String seatNo : seats){
-                statement.setString(1,bookingId);
-                statement.setString(2,seatNo);
+            if(null != customerBookingDetails.getSeatNumber()){
+            for(String seatNo : customerBookingDetails.getSeatNumber().split(",")){
+                statement.setString(1,customerBookingDetails.getBookingId());
+                statement.setString(2,customerBookingDetails.getSeatNumber());
                 statement.addBatch();
-            }
+            }}
             int batch_res[] = statement.executeBatch();
             statement.close();
             connection.close();
@@ -156,25 +176,25 @@ public class testDB {
  }
     }
 
-    public List<String> fetchSeats(String Date,String busId,String startPoint,String endPoint){
+    public List<String> fetchSeats(CustomerBookingDetails customerBookingDetails){
         List<String> seatNo = new ArrayList<>();
         int stationOrder_1 = 0;
         int stationOrder_2 = 0;
         try{
             Connection connection = DriverManager.getConnection(url,userName,passWord);
             PreparedStatement statement = connection.prepareStatement(SQLQueries.FETCHING_SEAT_STATION_ORDER_QUERY);
-            statement.setString(1,busId);
-            statement.setString(2,startPoint);
+            statement.setString(1,customerBookingDetails.getBus());
+            statement.setString(2,customerBookingDetails.getStartPoint());
             ResultSet result = statement.executeQuery();
             if(result.next()) stationOrder_1 = result.getInt("order");
-            statement.setString(1,busId);
-            statement.setString(2,endPoint);
+            statement.setString(1,customerBookingDetails.getBus());
+            statement.setString(2,customerBookingDetails.getEndPoint());
             result = statement.executeQuery();
             if(result.next()) stationOrder_2 = result.getInt("order");
             statement = connection.prepareStatement(SQLQueries.FETCHING_BOOKED_SEATS_QUERY);
             statement.setInt(1,stationOrder_1);
-            statement.setString(2,formatDateForDb(Date));
-            statement.setString(3,busId);
+            statement.setString(2,formatDateForDb(customerBookingDetails.getDate()));
+            statement.setString(3,customerBookingDetails.getBus());
             statement.setInt(4,stationOrder_2);
             result = statement.executeQuery();
             while(result.next()){

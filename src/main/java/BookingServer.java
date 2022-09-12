@@ -1,5 +1,6 @@
 package main.java;
 
+import main.java.bus.Bus;
 import main.java.customerBookingDetails.CustomerBookingDetails;
 import main.java.test.testDB;
 
@@ -19,6 +20,8 @@ public class BookingServer {
     private testDB td= null;
 
     private PrintWriter writer = null;
+
+    Bus bus = null;
     private static  final int PORT = 2022;
     private static  final int backlog = 100;
 
@@ -47,7 +50,7 @@ public class BookingServer {
                 CustomerBookingDetails customerBookingDetails = (CustomerBookingDetails) inStream.readObject();
                 if(null != customerBookingDetails)
                 {
-                    List<String> bookedSeats = td.fetchSeats(customerBookingDetails.getDate(),customerBookingDetails.getBus(),customerBookingDetails.getStartPoint(),customerBookingDetails.getEndPoint());
+                    List<String> bookedSeats = td.fetchSeats(customerBookingDetails);
                     for(String seat:bookedSeats){
                         if(Arrays.asList(customerBookingDetails.getSeatNumber().split(",")).contains(seat)) {
                             bookingConflict = true;
@@ -63,14 +66,7 @@ public class BookingServer {
                         }
                     }
                     if(!bookingConflict) {
-                        td.updateBookingDetails(customerBookingDetails.getBookingId(),
-                                customerBookingDetails.getCustomer(),
-                                customerBookingDetails.getStartPoint(),
-                                customerBookingDetails.getEndPoint(),
-                                customerBookingDetails.getBus(),
-                                customerBookingDetails.getDate(),
-                                Arrays.asList(customerBookingDetails.getSeatNumber().split(",")),
-                                customerBookingDetails.getFare());
+                        td.updateBookingDetails(customerBookingDetails);
                         td.logUpdate(customerBookingDetails.getBookingId(),"success");
                         writer.write("Booking successful, you're booking id is " + customerBookingDetails.getBookingId());
                         writer.close();

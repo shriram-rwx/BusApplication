@@ -22,6 +22,12 @@ public class Bus{
         this.route = route;
     }
 
+    public Bus(String NumberPlate,String startTime,String endTime) {
+        this.NumberPlate = NumberPlate;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
     public Routes getRoute() {
         return route;
     }
