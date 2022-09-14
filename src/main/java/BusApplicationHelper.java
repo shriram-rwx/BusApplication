@@ -46,6 +46,7 @@ public class BusApplicationHelper {
                 System.out.println("Request being processed by server");
                 outputStream = new  ObjectOutputStream(socket.getOutputStream());
                 outputStream.writeObject(customerBookingDetails);
+                
                 outputStream.flush();
                 inComing = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 result = inComing.readLine();
